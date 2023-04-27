@@ -5,12 +5,10 @@ import { useRouter } from "next/router";
 import {
   defaultDescription,
   defaultTitle,
-  verifyQueryParam,
 } from "../common/helpers";
 
 const TopBar = () => {
   const router = useRouter();
-  const game = verifyQueryParam(router.query.game, "fh");
 
   const path = router.asPath.split("/");
   let cardType = path.length >= 3 ? path[2] : null;

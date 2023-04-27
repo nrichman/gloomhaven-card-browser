@@ -1,38 +1,147 @@
-import { useRouter } from "next/router";
+import { useEffect, useState, ChangeEvent } from "react";
 import { GetServerSideProps } from "next";
+import { useRouter } from "next/router";
 
-import { characterSearchResults } from "./api/characters";
+import { itemSearchResults } from "./api/items";
+import { useSpoilers } from "../hooks/useSpoilers";
 import {
-  getCharacter,
-  getDefaultCharacterClass,
+  getBaseUrl,
+  getCharacterColor,
+  getDescription,
+  getTitle,
+  itemSpoilerFilter,
   verifyQueryParam,
 } from "../common/helpers";
-import { CharacterAbility } from "../common/types";
-import CharactersPage from "../components/pages/CharactersPage";
+import { Item, Option } from "../common/types";
+
+import CardList from "../components/CardList";
 import Layout from "../components/Layout";
+import Sort from "../components/Sort";
 
-type PageProps = {
-  searchResults: CharacterAbility[];
-};
+const sortOrderOptions: Option[] = [
+  { id: "id", name: "Item Number" },
+  { id: "cost", name: "Cost" },
+  { id: "name", name: "Name" },
+];
 
-const Characters = ({ searchResults }: PageProps) => {
+const slotFilters: Option[] = [
+  { id: "head", name: "Head" },
+  { id: "body", name: "Body" },
+  { id: "1h", name: "1 Hand" },
+  { id: "2h", name: "2 Hands" },
+  { id: "legs", name: "Legs" },
+  { id: "small", name: "Small Item" },
+];
+
+const activationsFilters: Option[] = [
+  { id: "consumed", name: "Consumed" },
+  { id: "spent", name: "Spent" },
+];
+
+const ItemFilters = () => {
   const router = useRouter();
-  const game = verifyQueryParam(router.query.game, "gh");
-  const character = getCharacter(getDefaultCharacterClass(game));
+  const query = router.query;
+
+  const handleSlotChange = (newSlot: string | null) => {
+    query.slot === newSlot ? delete query.slot : (query.slot = newSlot);
+    router.push({
+      pathname: "",
+      query: query,
+    });
+  };
+
+  const handleActivationsChange = (newActivations: string | null) => {
+    query.activations === newActivations
+      ? delete query.activations
+      : (query.activations = newActivations);
+    router.push({
+      pathname: "",
+      query: query,
+    });
+  };
 
   return (
-    <Layout title="Gloomhaven Card Browser">
-      <CharactersPage
-        character={character}
-        game={game}
-        searchResults={searchResults}
-      />
+    <div className="button-group filters">
+      {slotFilters.map((slot, idx) => (
+        <div
+          key={idx}
+          className={`filter-icon ${query.slot === slot.id ? "filter-icon-selected" : ""
+            }`}
+          onClick={() => handleSlotChange(slot.id)}
+        >
+          <img alt="" src={getBaseUrl() + `icons/items/${slot.id}.png`} />
+        </div>
+      ))}
+      <span style={{ marginLeft: "16px" }} />
+      {activationsFilters.map((activation, idx) => (
+        <div
+          key={idx}
+          className={`filter-icon ${query.activations === activation.id ? "filter-icon-selected" : ""
+            }`}
+          onClick={() => handleActivationsChange(activation.id)}
+        >
+          <img alt="" src={getBaseUrl() + `icons/items/${activation.id}.png`} />
+        </div>
+      ))}
+    </div>
+  );
+};
+
+type PageProps = {
+  searchResults: Item[];
+};
+
+const Items = ({ searchResults }: PageProps) => {
+  const [search, setSearch] = useState(null);
+  const { spoilers } = useSpoilers();
+
+  const router = useRouter();
+  const game = verifyQueryParam(router.query.game, "fh");
+
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setSearch(parseInt(e.target.value, 10));
+  };
+
+  useEffect(() => {
+    document.documentElement.style.setProperty(
+      "--primary",
+      getCharacterColor(null)
+    );
+  }, []);
+
+  const cardList = searchResults
+    ?.filter(itemSpoilerFilter(spoilers))
+    .filter((i) => !search || i.id === search);
+
+  return (
+    <Layout
+      description={getDescription(game, "Item Cards", searchResults)}
+      title={getTitle(game, "Items")}
+    >
+      <div className="toolbar">
+        <div className="toolbar-inner">
+          <Sort sortOrderOptions={sortOrderOptions} />
+          <div
+            className="flex"
+            style={{ fontWeight: 600, justifyContent: "center" }}
+          >
+            {"Item ID:"}
+            <input
+              className="id-filter"
+              onChange={handleSearchChange}
+              type="number"
+            />
+          </div>
+          <ItemFilters />
+        </div>
+      </div>
+      {<CardList cardList={cardList} showId />}
     </Layout>
   );
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const searchResults = await characterSearchResults(context.query);
+  const searchResults = await itemSearchResults(context.query);
 
   return {
     props: {
@@ -41,4 +150,4 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   };
 };
 
-export default Characters;
+export default Items;

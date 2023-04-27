@@ -8,8 +8,6 @@ export interface Card {
 export type Game = {
   id: string;
   name: string;
-  defaultClass: string;
-  defaultMonster: string;
 };
 
 export type Character = {
@@ -75,8 +73,5 @@ export type Option = {
 };
 
 export interface Spoilers {
-  characters: Set<string>;
-  items: Record<string, string | boolean>;
-  level: number;
-  loading: boolean;
+  items: number[];
 }

@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { Spoilers } from "../common/types";
-import { characters } from "../data/characters";
+import defaultSpoilers from "../data/item_unlocks.json"
 
 interface SpoilersContextInterface {
   spoilers: Spoilers;
@@ -8,21 +8,12 @@ interface SpoilersContextInterface {
 }
 
 export const defaultSpoilersContextValue: Spoilers = {
-  characters: new Set<string>(characters.map((c) => c.class)),
-  items: {
-    prosperity: "9",
-    recipes: true,
-    solo: true,
-    other: true,
-    fc: true,
-  },
-  level: 1,
-  loading: true,
+  items: defaultSpoilers.items,
 };
 
 const SpoilersContext = createContext<SpoilersContextInterface>({
   spoilers: defaultSpoilersContextValue,
-  setSpoilers: () => {},
+  setSpoilers: () => { },
 });
 
 export const SpoilersProvider = ({ children }) => {
@@ -63,7 +54,6 @@ export const useSpoilers = () => {
       "spoilers",
       JSON.stringify({
         ...newSpoilers,
-        characters: Array.from(newSpoilers.characters || []),
       })
     );
     setSpoilers(newSpoilers);

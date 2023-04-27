@@ -1,59 +1,16 @@
-import { useState } from "react";
 import Head from "next/head";
 import Script from "next/script";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGear } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/router";
 
-import { DropdownNav } from "../components/Dropdown";
 import {
   defaultDescription,
   defaultTitle,
   verifyQueryParam,
 } from "../common/helpers";
-import { Option } from "../common/types";
-import { games } from "../data/games";
-import Settings from "./Settings";
 
-const cardTypeOptions: Option[] = [
-  { id: "characters", name: "Characters" },
-  { id: "items", name: "Items" },
-  { id: "events", name: "Events" },
-  { id: "monsters", name: "Monsters" },
-];
-
-type SettingsAnchorProps = {
-  openSettingsDrawer: () => void;
-};
-
-const SettingsAnchor = ({ openSettingsDrawer }: SettingsAnchorProps) => {
-  return (
-    <div className="header-link view-more" onClick={openSettingsDrawer}>
-      <span>
-        <FontAwesomeIcon className="header-icon" icon={faGear} />
-        <span>Settings</span>
-      </span>
-    </div>
-  );
-};
-
-type TopBarProps = {
-  openSettingsDrawer: () => void;
-};
-
-const TopBar = ({ openSettingsDrawer }: TopBarProps) => {
+const TopBar = () => {
   const router = useRouter();
-  const game = verifyQueryParam(router.query.game, "gh");
-
-  const handleGameChange = (newGame: string) => {
-    let path = `/${newGame}`;
-    if (cardType) path += `/${cardType}`;
-    return path;
-  };
-
-  const handleCardTypeChange = (newCardType: string) => {
-    return `/${game}/${newCardType}`;
-  };
+  const game = verifyQueryParam(router.query.game, "fh");
 
   const path = router.asPath.split("/");
   let cardType = path.length >= 3 ? path[2] : null;
@@ -64,15 +21,7 @@ const TopBar = ({ openSettingsDrawer }: TopBarProps) => {
   return (
     <nav className="topbar">
       <div className="topbar-inner">
-        <div className="header-links">
-          <DropdownNav href={handleGameChange} options={games} value={game} />
-          <DropdownNav
-            href={handleCardTypeChange}
-            options={cardTypeOptions}
-            value={cardType || "characters"}
-          />
-        </div>
-        <SettingsAnchor openSettingsDrawer={openSettingsDrawer} />
+        {/* Header Content goes here*/}
       </div>
     </nav>
   );
@@ -85,8 +34,6 @@ type LayoutProps = {
 };
 
 const Layout = ({ children, description, title }: LayoutProps) => {
-  const [settingDrawerOpen, setSettingDrawerOpen] = useState(false);
-
   return (
     <>
       <Head>
@@ -110,11 +57,7 @@ const Layout = ({ children, description, title }: LayoutProps) => {
           gtag("config", "G-FFL6ZJNJ4T");
         `}
       </Script>
-      <Settings
-        open={settingDrawerOpen}
-        onClose={() => setSettingDrawerOpen(false)}
-      />
-      <TopBar openSettingsDrawer={() => setSettingDrawerOpen(true)} />
+      <TopBar />
       <main className="main">{children}</main>
     </>
   );

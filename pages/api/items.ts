@@ -6,7 +6,7 @@ import { customSort, verifyQueryParam } from "../../common/helpers";
 export const itemSearchResults = async (query: {
   [key: string]: string | string[];
 }) => {
-  const game = verifyQueryParam(query.game, "gh");
+  const game = verifyQueryParam(query.game, "fh");
   const order = verifyQueryParam(query.order, "id");
   const direction = verifyQueryParam(query.dir, "asc");
   const activations = verifyQueryParam(query.activations);
